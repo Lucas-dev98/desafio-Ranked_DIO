@@ -1,5 +1,5 @@
 const { calcularNivel, jogoRanked } = require('./jogoRanked');
-const prompt = require('prompt-sync');
+const prompt = require('prompt-sync')();
 
 // Testando a função calcularNivel
 describe('Função calcularNivel', () => {
@@ -34,19 +34,33 @@ describe('Função calcularNivel', () => {
 
 // Testando a função jogoRanked (simulando entradas com Jest)
 describe('Função jogoRanked', () => {
-  let promptSyncMock;
+  let promptMock;
 
-  beforeAll(() => {
-    // Criando um mock para o prompt-sync para simular a entrada do usuário
-    promptSyncMock = jest.spyOn(prompt, 'sync').mockImplementation(() => 'g');
+  beforeEach(() => {
+    promptMock = jest.spyOn(prompt, 'prompt');
   });
 
-  afterAll(() => {
-    promptSyncMock.mockRestore();
+  afterEach(() => {
+    promptMock.mockRestore();
   });
 
   test('Deve registrar vitórias corretamente', () => {
-    jest.spyOn(prompt, 'sync').mockImplementationOnce(() => 'g').mockImplementationOnce(() => 'p').mockImplementationOnce(() => 'sair');
+    promptMock.mockImplementationOnce(() => 'g').mockImplementationOnce(() => 'p').mockImplementationOnce(() => 'sair');
+    expect(jogoRanked()).toBe("O Herói tem de saldo de 1 está no nível de Ferro");
+  });
+
+  test('Deve registrar derrotas corretamente', () => {
+    promptMock.mockImplementationOnce(() => 'p').mockImplementationOnce(() => 'p').mockImplementationOnce(() => 'sair');
+    expect(jogoRanked()).toBe("O Herói tem de saldo de -2 está no nível de Ferro");
+  });
+
+  test('Deve registrar uma sequência mista de vitórias e derrotas', () => {
+    promptMock.mockImplementationOnce(() => 'g').mockImplementationOnce(() => 'p').mockImplementationOnce(() => 'g').mockImplementationOnce(() => 'sair');
+    expect(jogoRanked()).toBe("O Herói tem de saldo de 1 está no nível de Ferro");
+  });
+
+  test('Deve lidar com entrada inválida', () => {
+    promptMock.mockImplementationOnce(() => 'x').mockImplementationOnce(() => 'g').mockImplementationOnce(() => 'sair');
     expect(jogoRanked()).toBe("O Herói tem de saldo de 1 está no nível de Ferro");
   });
 });
